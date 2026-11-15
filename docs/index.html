@@ -1,0 +1,883 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Rechnungskiste</title>
+<meta name="description" content="Rechnungen schreiben. E-Rechnung automatisch. Alle Daten bleiben auf Ihrem Computer.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Barlow:wght@400;500;600&family=Barlow+Condensed:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+/* Layout: schwarze Bühne, riesige Kondensschrift, Blaukreis hinter dem Titel, Kiste davor. Zeilen getrennt durch feine Linien. */
+:root{
+  --ink:#0a0b0d;
+  --ink2:#121418;
+  --paper:#f2f1ed;
+  --blue:#2f6df6;
+  --sky:#92c0e0;
+  --mute:#9aa1ab;
+  --line:rgba(255,255,255,.16);
+  --f-display:"Anton","Bebas Neue","Impact","Haettenschweiler","Arial Narrow Bold",sans-serif;
+  --f-cond:"Barlow Condensed","Arial Narrow",sans-serif;
+  --f-body:"Barlow","Segoe UI",system-ui,sans-serif;
+  --gut:clamp(1rem,3.2vw,3rem);
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth;scroll-padding-top:5.5rem;background:var(--ink);-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--ink);color:var(--paper);font-family:var(--f-body);font-size:1.0625rem;line-height:1.55;overflow-x:hidden}
+img,svg{max-width:100%}
+a{color:inherit}
+button,input,select,textarea{font:inherit;color:inherit}
+:focus-visible{outline:3px solid var(--sky);outline-offset:3px}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.skip{position:absolute;left:1rem;top:-4rem;background:var(--paper);color:var(--ink);padding:.8rem 1.2rem;z-index:100;font-weight:600}
+.skip:focus{top:1rem}
+.wrap{padding-inline:var(--gut);max-width:96rem;margin-inline:auto}
+.cond{font-family:var(--f-cond);font-weight:600;letter-spacing:.2em;text-transform:uppercase}
+.disp{font-family:var(--f-display);font-weight:400;text-transform:uppercase;line-height:.92;letter-spacing:.005em}
+
+/* Fortschritt oben */
+#prog{position:fixed;left:0;top:0;height:3px;width:100%;background:var(--blue);transform-origin:0 50%;transform:scaleX(0);z-index:60}
+
+/* Kopfzeile */
+.nav{position:fixed;inset:0 0 auto 0;z-index:50;transition:background .3s,backdrop-filter .3s}
+.nav.stuck{background:rgba(10,11,13,.82);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px)}
+.nav .wrap{display:flex;align-items:center;justify-content:space-between;gap:1rem;min-height:4.5rem}
+.brand{display:flex;align-items:center;gap:.75rem;text-decoration:none}
+.brand svg{width:2.4rem;height:2.4rem;flex:none}
+.brand span{font-family:var(--f-display);font-size:1.5rem;letter-spacing:.02em;text-transform:uppercase;line-height:1}
+.links{display:flex;gap:clamp(1rem,2.6vw,2.6rem);list-style:none;margin:0;padding:0}
+.links a{font-family:var(--f-cond);font-weight:600;letter-spacing:.22em;text-transform:uppercase;font-size:.95rem;text-decoration:none;position:relative;padding:.6rem 0;display:inline-block}
+.links a::after{content:"";position:absolute;left:0;right:0;bottom:.25rem;height:2px;background:var(--blue);transform:scaleX(0);transform-origin:0 50%;transition:transform .35s cubic-bezier(.2,.8,.2,1)}
+.links a:hover::after,.links a:focus-visible::after,.links a.on::after{transform:scaleX(1)}
+.tools{display:flex;gap:.6rem;align-items:center}
+.ic{width:3rem;height:3rem;border-radius:50%;border:2px solid var(--paper);display:grid;place-items:center;background:transparent;cursor:pointer;transition:background .3s,color .3s,transform .3s}
+.ic:hover{background:var(--paper);color:var(--ink)}
+.ic svg{width:1.3rem;height:1.3rem}
+
+/* Pille / Knopf mit Füll-Animation */
+.pill{--h:3.25rem;position:relative;display:inline-flex;align-items:center;gap:.8rem;min-height:var(--h);padding:0 1.6rem;border:2px solid var(--paper);border-radius:99px;background:transparent;color:var(--paper);font-family:var(--f-cond);font-weight:700;font-size:1.1rem;letter-spacing:.18em;text-transform:uppercase;text-decoration:none;cursor:pointer;overflow:hidden;isolation:isolate;transition:color .35s,border-color .35s,transform .2s}
+.pill::before{content:"";position:absolute;inset:0;background:var(--paper);transform:translateY(101%);transition:transform .4s cubic-bezier(.2,.8,.2,1);z-index:-1;border-radius:inherit}
+.pill:hover,.pill:focus-visible{color:var(--ink)}
+.pill:hover::before,.pill:focus-visible::before{transform:none}
+.pill:active{transform:scale(.97)}
+.pill svg{width:1.1rem;height:1.1rem;transition:transform .35s}
+.pill:hover svg{transform:translate(3px,-3px)}
+.pill.solid{background:var(--blue);border-color:var(--blue);color:#fff}
+.pill.solid::before{background:var(--paper)}
+.pill.solid:hover{color:var(--ink);border-color:var(--paper)}
+.pill[disabled]{opacity:.55;cursor:default}
+.tag{display:inline-flex;align-items:center;min-height:2rem;padding:0 .9rem;border:1.5px solid var(--paper);border-radius:99px;font-family:var(--f-cond);font-weight:600;letter-spacing:.18em;font-size:.82rem;text-transform:uppercase}
+
+/* HERO */
+.hero{position:relative;padding-top:7.5rem;overflow:hidden}
+.hero .meta{display:flex;justify-content:space-between;align-items:center;gap:1rem;flex-wrap:wrap;margin-top:1.4rem}
+.hero .tags{display:flex;gap:.6rem;flex-wrap:wrap}
+.hero .rel{font-family:var(--f-cond);letter-spacing:.2em;font-size:.82rem;text-transform:uppercase;color:var(--mute)}
+.names{display:grid;grid-template-columns:repeat(4,auto);justify-content:space-between;gap:.6rem 1.5rem;margin-top:2.4rem;position:relative;z-index:3}
+.names span{font-family:var(--f-cond);font-weight:700;font-size:clamp(1.05rem,2.1vw,2rem);letter-spacing:.14em;text-transform:uppercase}
+.stage{position:relative;margin-top:.4rem}
+.circle{position:absolute;left:84%;top:46%;width:min(25vw,26rem);aspect-ratio:1;border-radius:50%;background:var(--blue);transform:translate(-50%,-50%);z-index:0;will-change:transform}
+.wm{position:relative;z-index:1;display:block;white-space:nowrap;overflow:visible}
+.wm .ln{display:block;overflow:hidden;padding-block:.02em}
+.wm .ln>span{display:inline-block;transform:translateY(105%);animation:rise 1.1s cubic-bezier(.16,.84,.24,1) forwards}
+.wm .ln:nth-child(2)>span{animation-delay:.14s}
+@keyframes rise{to{transform:none}}
+#wm1,#wm2{font-size:20vw}
+.object{position:absolute;z-index:2;left:84%;top:19%;width:clamp(10rem,17vw,18rem);transform:translateX(-52%);will-change:transform;pointer-events:none}
+.object svg{display:block;width:100%;height:auto;overflow:visible}
+.doc{transform:translateY(34%);animation:docUp 1.4s .5s cubic-bezier(.16,.84,.24,1) forwards}
+@keyframes docUp{to{transform:none}}
+.float{animation:bob 6s ease-in-out infinite}
+@keyframes bob{50%{transform:translateY(-1.2%)}}
+.ink{stroke-dasharray:1;stroke-dashoffset:1;animation:draw 1.2s 1.2s ease forwards}
+@keyframes draw{to{stroke-dashoffset:0}}
+.lower{position:relative;z-index:3;display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,1fr) auto;gap:2rem;align-items:end;margin-top:-1rem;padding-bottom:2.2rem}
+.lower .lead{max-width:30rem}
+.lower .lead .cond{font-size:.9rem;color:var(--sky);margin-bottom:.6rem;display:flex;gap:.7rem;align-items:center}
+.lower .lead .cond i{width:2rem;height:2px;background:var(--sky);display:block}
+.lower .lead p{margin:0;font-size:1.15rem;color:#d5d8dd}
+.lower .cta{display:flex;justify-content:center}
+.badge{width:7.6rem;height:7.6rem;position:relative;flex:none}
+.badge svg{width:100%;height:100%;animation:spin 22s linear infinite}
+.badge .mk{position:absolute;inset:0;margin:auto;width:3.2rem;height:3.2rem}
+@keyframes spin{to{transform:rotate(360deg)}}
+.vert{position:absolute;right:var(--gut);top:46%;writing-mode:vertical-rl;font-family:var(--f-cond);letter-spacing:.2em;font-weight:600;z-index:3;font-size:1.1rem}
+.dashline{position:absolute;left:0;right:0;top:62%;height:4px;z-index:0;background:repeating-linear-gradient(90deg,rgba(255,255,255,.8) 0 14px,transparent 14px 28px);animation:dm 1.1s linear infinite;mask-image:linear-gradient(90deg,transparent,#000 14%,#000 86%,transparent);-webkit-mask-image:linear-gradient(90deg,transparent,#000 14%,#000 86%,transparent)}
+@keyframes dm{to{background-position:28px 0}}
+
+/* Lauftext */
+.marq{border-block:1px solid var(--line);overflow:hidden;white-space:nowrap;padding-block:1rem;background:var(--ink)}
+.marq .tr{display:inline-flex;animation:mq 38s linear infinite}
+.marq.rev .tr{animation-direction:reverse;animation-duration:46s}
+.marq span{font-family:var(--f-display);font-size:clamp(2.4rem,6vw,5rem);text-transform:uppercase;padding-right:2.4rem;color:transparent;-webkit-text-stroke:1.5px var(--paper);line-height:1}
+.marq span.f{color:var(--paper);-webkit-text-stroke:0}
+.marq:hover .tr{animation-play-state:paused}
+@keyframes mq{to{transform:translateX(-50%)}}
+
+/* Abschnitte */
+section{position:relative}
+.sec{padding-block:clamp(4rem,10vw,9rem)}
+.eyebrow{display:flex;align-items:center;gap:.8rem;font-family:var(--f-cond);font-weight:600;letter-spacing:.22em;text-transform:uppercase;font-size:.95rem;color:var(--sky);margin:0 0 1.4rem}
+.eyebrow i{width:2.4rem;height:2px;background:var(--sky)}
+.h2{font-size:clamp(2.6rem,8.6vw,8.6rem);margin:0;overflow-wrap:normal;word-break:normal}
+.h2 .mask{padding-bottom:.04em}
+.rv{transition:transform .9s cubic-bezier(.16,.84,.24,1),opacity .9s}
+.js .rv:not(.in){opacity:0;transform:translateY(2.4rem)}
+.mask{display:block;overflow:hidden}
+.mask>span{display:block;transition:transform 1s cubic-bezier(.16,.84,.24,1)}
+.js .mask:not(.in)>span{transform:translateY(108%)}
+
+/* Statement */
+.state{overflow-wrap:anywhere;font-family:var(--f-display);text-transform:uppercase;font-size:clamp(2.6rem,7.4vw,7.2rem);line-height:1;margin:0;max-width:22ch}
+.state .w{color:rgba(242,241,237,.2);transition:color .25s}
+.state .w.on{color:var(--paper)}
+.state .w.b.on{color:var(--blue)}
+.nojs .state .w{color:var(--paper)}
+
+/* Schritte */
+.steps{position:relative}
+.steps .track{height:320vh}
+.steps .pin .wrap{width:100%}
+.steps .pin{position:sticky;top:0;height:100vh;height:100dvh;display:grid;align-content:center}
+.steps .grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:clamp(1.5rem,5vw,5rem);align-items:center}
+.bignum{font-family:var(--f-display);font-size:clamp(9rem,26vw,24rem);line-height:.8;position:relative;height:.8em;color:transparent;-webkit-text-stroke:2px var(--paper)}
+.bignum span{position:absolute;left:0;top:0;opacity:0;transform:translateY(12%);transition:opacity .5s,transform .7s cubic-bezier(.16,.84,.24,1)}
+.bignum span.on{opacity:1;transform:none;color:var(--blue);-webkit-text-stroke:0}
+.st-txt{position:relative;min-height:19rem}
+.st{position:absolute;inset:0 auto auto 0;width:100%;opacity:0;transform:translateY(2rem);pointer-events:none;transition:opacity .5s,transform .7s cubic-bezier(.16,.84,.24,1)}
+.st.on{opacity:1;transform:none;pointer-events:auto}
+.st h3{overflow-wrap:anywhere;font-family:var(--f-display);font-weight:400;font-size:clamp(2.6rem,6vw,5.4rem);text-transform:uppercase;line-height:.95;margin:0 0 1rem}
+.st p{font-size:1.2rem;max-width:30rem;color:#d5d8dd;margin:0 0 1.4rem}
+.mock{border:1.5px solid var(--line);background:var(--ink2);padding:1.1rem;max-width:30rem;font-size:1rem}
+.mock .row{display:flex;justify-content:space-between;gap:1rem;align-items:center;border-bottom:1px solid var(--line);padding:.7rem 0}
+.mock .row:last-child{border:0}
+.mock label{font-family:var(--f-cond);letter-spacing:.14em;font-size:.82rem;text-transform:uppercase;color:var(--mute)}
+.typ{display:inline-block;overflow:hidden;white-space:nowrap;vertical-align:bottom;width:0;max-width:100%}
+.st.on .typ{animation:typing 1.3s steps(20) forwards}
+.st.on .typ.d2{animation-delay:1.1s;animation-duration:1.1s}
+.st.on .typ.d3{animation-delay:2.1s;animation-duration:.9s}
+@keyframes typing{to{width:var(--w,14ch)}}
+.chk{display:inline-grid;place-items:center;width:1.3rem;height:1.3rem;border:2px solid var(--paper);margin-right:.6rem;vertical-align:middle}
+.chk svg{width:.9rem;height:.9rem;stroke-dasharray:1;stroke-dashoffset:1}
+.st.on .chk svg{animation:draw .5s 2.6s forwards}
+.sel{border:1.5px solid var(--sky);color:var(--sky);padding:.1rem .6rem;font-family:var(--f-cond);font-weight:600;letter-spacing:.08em}
+.files{display:flex;gap:.6rem;flex-wrap:wrap;margin-top:.9rem}
+.file{border:1.5px solid var(--paper);padding:.3rem .7rem;font-family:var(--f-cond);letter-spacing:.1em;font-weight:600;opacity:0;transform:translateY(.8rem)}
+.st.on .file{animation:pop .6s forwards}
+.st.on .file:nth-child(1){animation-delay:1.2s}.st.on .file:nth-child(2){animation-delay:1.5s}.st.on .file:nth-child(3){animation-delay:1.8s}
+@keyframes pop{to{opacity:1;transform:none}}
+.dots{display:flex;gap:.6rem;margin-top:1.6rem}
+.dots i{width:2.4rem;height:4px;background:var(--line);transition:background .4s}
+.dots i.on{background:var(--blue)}
+
+/* E-Rechnung */
+.erg{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);gap:clamp(2rem,6vw,6rem);align-items:center}
+.erg .h2,#kontakt .h2,#download .h2{font-size:clamp(2.6rem,6.4vw,6.6rem)}
+.erg p{font-size:1.2rem;max-width:34rem;color:#d5d8dd}
+.pair{position:relative;overflow:hidden;padding:2.5rem 0;height:clamp(20rem,40vw,31rem)}
+.sheet{position:absolute;width:62%;aspect-ratio:.72;background:var(--paper);color:var(--ink);padding:1.2rem;transition:transform 1.2s cubic-bezier(.16,.84,.24,1)}
+.sheet.a{left:2%;top:6%;transform:translate(-14%,6%) rotate(-7deg)}
+.sheet.b{right:2%;top:0;background:var(--blue);color:#fff;transform:translate(14%,-4%) rotate(6deg);font-family:ui-monospace,Consolas,monospace;font-size:.78rem;line-height:1.5}
+.pair.in .sheet.a{transform:rotate(-3deg)}
+.pair.in .sheet.b{transform:rotate(3deg)}
+.sheet .ln2{height:.55rem;background:#cfd2d8;margin-bottom:.55rem}
+.sheet .ln2.s{width:60%}.sheet .ln2.m{width:80%}
+.sheet h4{font-family:var(--f-display);font-weight:400;font-size:1.7rem;margin:0 0 1rem;text-transform:uppercase}
+.sheet.b code{display:block;white-space:nowrap;overflow:hidden}
+.stamp{position:absolute;left:50%;bottom:1.2rem;transform:translate(-50%,0) rotate(-8deg) scale(.6);opacity:0;border:3px solid var(--paper);background:var(--ink);padding:.5rem 1.1rem;font-family:var(--f-display);font-size:1.5rem;text-transform:uppercase;letter-spacing:.04em;transition:transform .7s .9s cubic-bezier(.3,1.6,.5,1),opacity .4s .9s;z-index:2}
+.pair.in .stamp{opacity:1;transform:translate(-50%,0) rotate(-8deg) scale(1)}
+.fname{margin-top:1.6rem;display:grid;gap:.5rem;font-family:ui-monospace,Consolas,monospace;font-size:.92rem;color:var(--mute)}
+.fname b{color:var(--paper);font-weight:500}
+
+/* Funktionen */
+.list{list-style:none;margin:2.4rem 0 0;padding:0;border-top:1px solid var(--line)}
+.list li{display:grid;grid-template-columns:4rem minmax(0,1.1fr) minmax(0,1fr);gap:1rem 2rem;align-items:baseline;padding:1.6rem 0;border-bottom:1px solid var(--line);position:relative;transition:padding .4s}
+.list li::before{content:"";position:absolute;inset:0;background:var(--blue);transform:scaleY(0);transform-origin:50% 100%;transition:transform .45s cubic-bezier(.2,.8,.2,1);z-index:-1}
+.list li:hover::before{transform:scaleY(1)}
+.list li:hover{padding-inline:1rem}
+.list .n{font-family:var(--f-cond);letter-spacing:.2em;color:var(--mute);font-weight:600}
+.list h3{overflow-wrap:anywhere;margin:0;font-family:var(--f-display);font-weight:400;font-size:clamp(1.9rem,4.2vw,3.6rem);text-transform:uppercase;line-height:1}
+.list p{margin:0;color:#d5d8dd;font-size:1.1rem}
+.list li:hover .n{color:var(--paper)}
+.fx{isolation:isolate}
+
+/* Zahlen */
+.facts{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));border-top:1px solid var(--line);margin-top:3rem}
+.facts div{padding:1.6rem 1.4rem 0 0}
+.facts b{display:block;font-family:var(--f-display);font-weight:400;font-size:clamp(4rem,10vw,9rem);line-height:.95;color:var(--paper)}
+.facts b em{font-style:normal;color:var(--blue)}
+.facts span{font-family:var(--f-cond);letter-spacing:.16em;text-transform:uppercase;font-weight:600;font-size:.95rem;color:var(--mute)}
+.local{font-size:clamp(3rem,9vw,8.6rem)}
+.path{display:inline-block;margin-top:2rem;border:1.5px solid var(--line);padding:.7rem 1.1rem;font-family:ui-monospace,Consolas,monospace;font-size:1rem;color:var(--sky);max-width:100%;overflow-wrap:anywhere}
+
+/* Preise */
+.price{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:0;border:1.5px solid var(--line);margin-top:3rem}
+.pc{padding:clamp(1.5rem,3.4vw,3rem);display:flex;flex-direction:column;gap:1rem;position:relative;overflow:hidden}
+.pc+.pc{border-left:1.5px solid var(--line)}
+.pc.hl{background:var(--blue)}
+.pc h3{margin:0;font-family:var(--f-cond);letter-spacing:.22em;text-transform:uppercase;font-size:1.1rem;font-weight:700}
+.pc .big{font-family:var(--f-display);font-size:clamp(5rem,12vw,11rem);line-height:.9}
+.pc .big small{font-family:var(--f-cond);font-weight:600;font-size:clamp(1rem,1.8vw,1.5rem);letter-spacing:.14em;text-transform:uppercase;margin-left:.4rem}
+.pc ul{list-style:none;margin:0;padding:0;display:grid;gap:.6rem}
+.pc li{display:flex;gap:.8rem;align-items:flex-start;font-size:1.15rem}
+.pc li svg{width:1.2rem;height:1.2rem;flex:none;margin-top:.35rem}
+.pc .pill{align-self:flex-start;margin-top:auto}
+.pc.hl .pill{border-color:#fff;color:#fff}
+.pc.hl .pill:hover{color:var(--ink)}
+.small{color:var(--mute);font-size:1rem;margin-top:1.4rem}
+.small b{color:var(--paper);font-weight:500}
+
+/* FAQ */
+.faq{border-top:1px solid var(--line);margin-top:2.4rem}
+.faq details{border-bottom:1px solid var(--line)}
+.faq summary{list-style:none;cursor:pointer;display:flex;justify-content:space-between;align-items:center;gap:1.2rem;padding:1.5rem 0;font-family:var(--f-display);text-transform:uppercase;font-size:clamp(1.7rem,3.6vw,3rem);line-height:1.05;min-height:3.5rem}
+.faq summary::-webkit-details-marker{display:none}
+.faq summary i{flex:none;width:3rem;height:3rem;border:2px solid var(--paper);border-radius:50%;position:relative;transition:transform .4s,background .3s}
+.faq summary i::before,.faq summary i::after{content:"";position:absolute;left:50%;top:50%;width:1.1rem;height:2px;background:currentColor;transform:translate(-50%,-50%)}
+.faq summary i::after{transform:translate(-50%,-50%) rotate(90deg);transition:transform .4s}
+.faq details[open] summary i{background:var(--blue);border-color:var(--blue);transform:rotate(180deg)}
+.faq details[open] summary i::after{transform:translate(-50%,-50%) rotate(0)}
+.faq summary:hover i{background:var(--paper);color:var(--ink)}
+.faq .ans{display:grid;grid-template-rows:0fr;transition:grid-template-rows .45s cubic-bezier(.2,.8,.2,1)}
+.faq details[open] .ans{grid-template-rows:1fr}
+.faq .ans>div{overflow:hidden}
+.faq .ans p{margin:0 0 1.6rem;max-width:46rem;font-size:1.15rem;color:#d5d8dd}
+
+/* Download */
+.dl{background:var(--paper);color:var(--ink)}
+.dl .eyebrow{color:var(--blue)}.dl .eyebrow i{background:var(--blue)}
+.dl .grid{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr);gap:clamp(2rem,5vw,5rem);align-items:end}
+.dl .pill{border-color:var(--ink);color:var(--ink)}
+.dl .pill::before{background:var(--ink)}
+.dl .pill:hover{color:var(--paper)}
+.dl .pill.solid{background:var(--ink);color:var(--paper)}
+.dl .pill.solid::before{background:var(--blue)}
+.dl .pill.solid:hover{border-color:var(--blue);color:#fff}
+.dl .info{display:grid;gap:.2rem;border-top:2px solid var(--ink);margin-top:1.8rem}
+.dl .info div{display:flex;justify-content:space-between;gap:1rem;padding:.7rem 0;border-bottom:1px solid rgba(10,11,13,.25);font-size:1.1rem}
+.dl .info span:first-child{font-family:var(--f-cond);font-weight:600;letter-spacing:.16em;text-transform:uppercase;font-size:.95rem}
+.dl ol{margin:0;padding:0;list-style:none;display:grid;gap:1rem;counter-reset:s}
+.dl ol li{counter-increment:s;display:grid;grid-template-columns:3.2rem 1fr;gap:1rem;font-size:1.15rem}
+.dl ol li::before{content:counter(s);font-family:var(--f-display);font-size:2.6rem;line-height:.9;color:var(--blue)}
+.dl .hint{margin-top:1.2rem;font-size:1rem;border-left:4px solid var(--blue);padding-left:1rem;max-width:30rem}
+.dl .btns{display:flex;gap:.8rem;flex-wrap:wrap;margin-top:2rem}
+
+/* Kontakt */
+.contact{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.1fr);gap:clamp(2rem,6vw,6rem);align-items:start}
+form{display:grid;gap:1.2rem;scroll-margin-block:30vh}
+.fld{display:grid;gap:.4rem}
+.fld label{font-family:var(--f-cond);font-weight:600;letter-spacing:.18em;text-transform:uppercase;font-size:.9rem;color:var(--mute)}
+.fld input,.fld select,.fld textarea{width:100%;min-height:3.4rem;background:transparent;border:0;border-bottom:2px solid var(--line);padding:.7rem 0;font-size:1.2rem;border-radius:0;transition:border-color .3s;scroll-margin-block:30vh}
+.fld select option{background:var(--ink2);color:var(--paper)}
+.fld textarea{min-height:9rem;resize:vertical}
+.fld input:focus,.fld select:focus,.fld textarea:focus{outline:none;border-color:var(--blue)}
+.fld input:focus-visible,.fld textarea:focus-visible,.fld select:focus-visible{outline:none;border-color:var(--sky)}
+.fld [aria-invalid="true"]{border-color:#ff8a6b}
+.err{color:#ffb4a0;font-size:1rem;min-height:1.4rem}
+.ok{border:1.5px solid var(--sky);padding:1.1rem 1.2rem;color:var(--paper);display:none}
+.ok.show{display:block}
+.ok p{margin:0 0 .8rem}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:1.2rem}
+.hp{position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden}
+.mailto{font-family:ui-monospace,Consolas,monospace;overflow-wrap:anywhere;color:var(--sky)}
+
+/* Footer */
+footer{border-top:1px solid var(--line);overflow:hidden}
+.fbig{display:block;width:max-content;font-family:var(--f-display);font-size:19.2vw;line-height:.86;text-transform:uppercase;white-space:nowrap;margin:0;padding-top:2rem;color:var(--paper);letter-spacing:.005em}
+.fbar{display:flex;justify-content:space-between;gap:1rem 2rem;flex-wrap:wrap;padding-block:1.6rem;border-top:1px solid var(--line);font-size:1rem;color:var(--mute)}
+.fbar nav{display:flex;gap:1.6rem;flex-wrap:wrap}
+.fbar button,.fbar a{background:none;border:0;padding:.6rem 0;cursor:pointer;color:var(--paper);text-decoration:underline;text-underline-offset:.3em;text-decoration-thickness:1px;font-size:1rem;min-height:2.75rem}
+.fbar button:hover,.fbar a:hover{color:var(--sky)}
+
+/* Impressum */
+dialog{border:1.5px solid var(--paper);background:var(--ink);color:var(--paper);padding:0;width:min(44rem,calc(100% - 2rem));max-height:calc(100dvh - 2rem)}
+dialog::backdrop{background:rgba(0,0,0,.78)}
+dialog .in{padding:clamp(1.4rem,4vw,2.6rem);overflow:auto;max-height:calc(100dvh - 2rem)}
+dialog h2{font-family:var(--f-display);font-weight:400;font-size:clamp(2.6rem,7vw,4.4rem);text-transform:uppercase;margin:0 0 1.2rem;line-height:1}
+dialog h3{font-family:var(--f-cond);letter-spacing:.18em;text-transform:uppercase;font-size:.95rem;color:var(--sky);margin:1.6rem 0 .3rem}
+dialog p{margin:0 0 .4rem}
+dialog .x{position:absolute;right:1rem;top:1rem}
+.fill{background:#3a2f00;color:#ffd666;padding:0 .3rem}
+
+/* Handy und große Schrift */
+@media (max-width:62rem){
+  .links{display:none}
+  .lower{grid-template-columns:1fr;gap:1.4rem}
+  .lower .cta{justify-content:flex-start}
+  .badge{display:none}
+  .names{grid-template-columns:repeat(2,auto);gap:.4rem 1rem;margin-top:1.4rem}
+  .vert{display:none}
+  .stage{padding-bottom:min(88vw,21rem)}
+  .circle{left:50%;width:86vw;top:auto;bottom:.8rem;transform:translate(-50%,0)}
+  .object{left:50%;width:min(64vw,17rem);top:auto;bottom:1.2rem;transform:translateX(-50%)}
+  .dashline{display:none}
+  .pill{letter-spacing:.12em;font-size:1rem}
+  .steps .track{height:auto}
+  .steps .pin{position:static;height:auto;display:block}
+  .steps .grid{grid-template-columns:1fr}
+  .bignum{display:none}
+  .st-txt{min-height:0;display:grid;gap:3.4rem}
+  .st{position:static;opacity:1;transform:none;pointer-events:auto}
+  .typ{width:var(--w,14ch)!important;animation:none!important}
+  .file,.chk svg{opacity:1;transform:none;animation:none!important;stroke-dashoffset:0}
+  .dots{display:none}
+  .erg,.dl .grid,.contact{grid-template-columns:1fr}
+  .list li{grid-template-columns:2.6rem 1fr}
+  .list li p{grid-column:2}
+  .facts{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .price{grid-template-columns:1fr}
+  .pc+.pc{border-left:0;border-top:1.5px solid var(--line)}
+  .row2{grid-template-columns:1fr}
+}
+@media (max-width:30rem){
+  .tools .ic.mail{display:none}
+  .brand span{display:none}
+  .nav .pill{padding:0 1.1rem;font-size:1rem}
+  .lower .pill{width:100%;justify-content:space-between}
+}
+@media (prefers-reduced-motion:reduce){
+  html{scroll-behavior:auto}
+  *,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important;animation-delay:0s!important}
+  .wm .ln>span,.doc{transform:none}
+  .ink{stroke-dashoffset:0}
+  .js .rv:not(.in){opacity:1;transform:none}
+  .js .mask:not(.in)>span{transform:none}
+  .state .w{color:var(--paper)}
+  .typ{width:var(--w,14ch)}
+  .file{opacity:1;transform:none}
+  .chk svg{stroke-dashoffset:0}
+}
+</style>
+</head>
+<body class="nojs">
+<a class="skip" href="#inhalt">Zum Inhalt springen</a>
+<div id="prog" aria-hidden="true"></div>
+
+<header class="nav" id="nav">
+  <div class="wrap">
+    <a class="brand" href="#top" aria-label="Rechnungskiste, zum Seitenanfang">
+      <svg viewBox="0 0 512 512" aria-hidden="true"><rect width="512" height="512" rx="112" fill="#fff"/><path d="M150 92h150l82 82v170H150z" fill="#2b5797"/><path d="M84 300h344a12 12 0 0 1 12 12l-24 112a28 28 0 0 1-27 22H123a28 28 0 0 1-27-22L72 312a12 12 0 0 1 12-12z" fill="#92c0e0"/></svg>
+      <span>Rechnungskiste</span>
+    </a>
+    <ul class="links">
+      <li><a href="#funktionen">Funktionen</a></li>
+      <li><a href="#erechnung">E-Rechnung</a></li>
+      <li><a href="#preise">Preise</a></li>
+      <li><a href="#fragen">Fragen</a></li>
+    </ul>
+    <div class="tools">
+      <a class="ic mail" href="#kontakt" aria-label="Zum Kontaktformular"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="1"/><path d="M3 7l9 7 9-7"/></svg></a>
+      <a class="pill" href="#download" data-mag>Download</a>
+    </div>
+  </div>
+</header>
+
+<main id="inhalt">
+<!-- HERO -->
+<section class="hero" id="top">
+  <div class="wrap" style="position:relative">
+    <div class="stage" id="stage">
+      <div class="circle" id="circle" aria-hidden="true"></div>
+      <h1 class="wm disp" aria-label="Rechnungskiste">
+        <span class="ln" aria-hidden="true"><span id="wm1">Rechnungs</span></span>
+        <span class="ln" aria-hidden="true"><span id="wm2">Kiste</span></span>
+      </h1>
+      <div class="object" id="object" aria-hidden="true">
+        <svg viewBox="0 0 420 380" class="float">
+          <g class="doc">
+            <path d="M92 18h168l76 76v200H92z" fill="#f2f1ed"/>
+            <path d="M260 18v76h76z" fill="#c9ccd2"/>
+            <g fill="none" stroke="#2b5797" stroke-width="12" stroke-linecap="round">
+              <path class="ink" pathLength="1" d="M124 134h118"/>
+              <path class="ink" pathLength="1" d="M124 168h160" style="animation-delay:1.4s"/>
+              <path class="ink" pathLength="1" d="M124 202h96" style="animation-delay:1.6s"/>
+              <path class="ink" pathLength="1" d="M124 252h160" stroke="#2f6df6" style="animation-delay:1.9s"/>
+            </g>
+          </g>
+          <path d="M28 214h364a14 14 0 0 1 14 17l-30 120a28 28 0 0 1-27 21H71a28 28 0 0 1-27-21L14 231a14 14 0 0 1 14-17z" fill="#92c0e0"/>
+          <path d="M28 214h364a14 14 0 0 1 14 17l-6 22H20l-6-22a14 14 0 0 1 14-17z" fill="#2b5797"/>
+          <rect x="150" y="262" width="120" height="14" rx="7" fill="#f2f1ed" opacity=".85"/>
+        </svg>
+      </div>
+    </div>
+    <div class="lower">
+      <div class="lead">
+        <div class="cond"><i></i>Was ist das</div>
+        <p>Rechnungen schreiben, ohne Konto und ohne Cloud. Für Firmenkunden entsteht die E-Rechnung automatisch daneben. Alles bleibt als normale Dateien auf Ihrem Computer.</p>
+      </div>
+      <div class="cta"><a class="pill solid" href="#download" data-mag>Jetzt herunterladen <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17L17 7M8 7h9v9"/></svg></a></div>
+    </div>
+  </div>
+</section>
+
+<div class="marq" aria-hidden="true"><div class="tr">
+  <span class="f">Rechnung schreiben</span><span>E-Rechnung</span><span class="f">Alles lokal</span><span>Kein Konto</span><span class="f">Buchführung inklusive</span><span>Steuersatz pro Position</span>
+  <span class="f">Rechnung schreiben</span><span>E-Rechnung</span><span class="f">Alles lokal</span><span>Kein Konto</span><span class="f">Buchführung inklusive</span><span>Steuersatz pro Position</span>
+</div></div>
+
+<!-- STATEMENT -->
+<section class="sec">
+  <div class="wrap">
+    <p class="eyebrow"><i></i>Das Prinzip</p>
+    <p class="state" id="state" data-words>Sie tippen, was Sie geleistet haben. Rechnungskiste rechnet, prüft und sortiert. Ihre Daten bleiben <span class="b">auf Ihrem Computer.</span></p>
+  </div>
+</section>
+
+<div class="marq rev" aria-hidden="true"><div class="tr">
+  <span>XRechnung</span><span class="f">Geprüft nach dem Speichern</span><span>PDF</span><span class="f">XML</span><span>Zwei Dateien</span><span class="f">Ein Klick</span>
+  <span>XRechnung</span><span class="f">Geprüft nach dem Speichern</span><span>PDF</span><span class="f">XML</span><span>Zwei Dateien</span><span class="f">Ein Klick</span>
+</div></div>
+
+<!-- E-RECHNUNG -->
+<section class="sec" id="erechnung">
+  <div class="wrap erg">
+    <div>
+      <p class="eyebrow"><i></i>E-Rechnung</p>
+      <h2 class="h2 disp"><span class="mask"><span>Ein Klick.</span></span><span class="mask"><span>Zwei Dateien.</span></span></h2>
+      <p class="rv" style="margin-top:2rem">Für Firmenkunden speichert Rechnungskiste neben dem PDF die E-Rechnung im Standard XRechnung. Nach dem Speichern prüft das Programm sie mit dem offiziellen KoSIT-Prüfer und zeigt das Ergebnis direkt an. Beim Versand hängen Sie beide Dateien an.</p>
+      <div class="fname rv"><span><b>Rechnung_2026-k7m3xq_Musterfirma GmbH.pdf</b></span><span><b>Rechnung_2026-k7m3xq_Musterfirma GmbH_XRechnung.xml</b></span></div>
+    </div>
+    <div class="pair" id="pair" aria-hidden="true">
+      <div class="sheet a"><h4>Rechnung</h4><div class="ln2 m"></div><div class="ln2"></div><div class="ln2 s"></div><div class="ln2 m"></div><div class="ln2 s"></div></div>
+      <div class="sheet b"><code>&lt;rsm:CrossIndustryInvoice&gt;</code><code>&nbsp;&nbsp;&lt;ram:ID&gt;2026-k7m3xq&lt;/ram:ID&gt;</code><code>&nbsp;&nbsp;&lt;ram:TypeCode&gt;380&lt;/ram:TypeCode&gt;</code><code>&nbsp;&nbsp;&lt;ram:CurrencyCode&gt;EUR</code><code>&nbsp;&nbsp;&lt;ram:CategoryCode&gt;S</code><code>&nbsp;&nbsp;&lt;ram:Rate&gt;19&lt;/ram:Rate&gt;</code></div>
+      <div class="stamp">Geprüft</div>
+    </div>
+  </div>
+</section>
+
+<!-- FUNKTIONEN -->
+<section class="sec fx" id="funktionen">
+  <div class="wrap">
+    <p class="eyebrow"><i></i>Funktionen</p>
+    <h2 class="h2 disp"><span class="mask"><span>Alles, was</span></span><span class="mask"><span>Sie brauchen.</span></span></h2>
+    <ul class="list">
+      <li class="rv"><span class="n">01</span><h3>Steuersatz pro Position</h3><p>19, 7 oder 0 Prozent, auch gemischt auf einer Rechnung. Die Summen werden je Satz ausgewiesen.</p></li>
+      <li class="rv"><span class="n">02</span><h3>Kunden und Leistungen merken</h3><p>Einmal eintippen, danach mit der Suche wiederfinden.</p></li>
+      <li class="rv"><span class="n">03</span><h3>Ordner nach Jahr</h3><p>Ausgegangene und eingegangene Rechnungen liegen sortiert auf Ihrem Computer. Kopieren, verschieben und löschen wie im Explorer.</p></li>
+      <li class="rv"><span class="n">04</span><h3>Direkt im Dokument ändern</h3><p>Alte Rechnungen und Entwürfe lassen sich nachträglich mit Maus und Tastatur bearbeiten.</p></li>
+      <li class="rv"><span class="n">05</span><h3>Buchführung inklusive</h3><p>Jede ausgegangene Rechnung wird automatisch verbucht. Das Ergebnis ist eine Datei für Excel.</p></li>
+      <li class="rv"><span class="n">06</span><h3>Zufällige Rechnungsnummern</h3><p>Eine Nummer wird nie doppelt vergeben, zum Beispiel 2026-k7m3xq.</p></li>
+      <li class="rv"><span class="n">07</span><h3>Läuft offline</h3><p>Kein Konto, keine Anmeldung, keine Cloud.</p></li>
+    </ul>
+  </div>
+</section>
+
+<!-- LOKAL -->
+<section class="sec" style="padding-top:0">
+  <div class="wrap">
+    <h2 class="h2 disp local"><span class="mask"><span>Ihre Daten</span></span><span class="mask"><span style="color:var(--blue)">bleiben zuhause.</span></span></h2>
+    <div class="path rv">Dokumente\Rechnungskiste\Ausgegangene Rechnungen\2026</div>
+    <div class="facts" id="facts">
+            <div><b data-count="3" data-from="0">3</b><span>Gratis-Rechnungen pro Monat</span></div>
+      <div><b data-count="14" data-from="0">14</b><span>Tage Widerruf</span></div>
+      <div><b data-count="0" data-from="20">0</b><span>Konten nötig</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- PREISE -->
+<section class="sec" id="preise" style="padding-top:0">
+  <div class="wrap">
+    <p class="eyebrow"><i></i>Preise</p>
+    <h2 class="h2 disp"><span class="mask"><span>Klar und</span></span><span class="mask"><span>fair.</span></span></h2>
+    <div class="price rv">
+      <div class="pc">
+        <h3>Kostenlos</h3>
+        <div class="big">0 €</div>
+        <ul>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12l5 5L20 6"/></svg>3 Rechnungen pro Monat</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12l5 5L20 6"/></svg>PDF und E-Rechnung</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12l5 5L20 6"/></svg>Ordner mit automatischer Sortierung</li>
+        </ul>
+        <a class="pill" href="#download">Kostenlos starten</a>
+      </div>
+      <div class="pc hl">
+        <h3>Vollversion</h3>
+        <div class="big">44 €<small>pro Jahr</small></div>
+        <ul>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12l5 5L20 6"/></svg>Unbegrenzt viele Rechnungen</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12l5 5L20 6"/></svg>Alle Updates im Lizenzjahr</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12l5 5L20 6"/></svg>14 Tage Widerruf mit Geld zurück</li>
+        </ul>
+        <a class="pill" href="#kontakt" data-topic="Lizenz oder Kauf">Lizenz anfragen</a>
+      </div>
+    </div>
+    <p class="small">Alle Preise zzgl. gesetzlicher MwSt. Auf Wunsch richten wir die Rechnungskiste per Telefon mit Ihnen ein, <b>einmalig 13,99 €</b>.</p>
+  </div>
+</section>
+
+<!-- FAQ -->
+<section class="sec" id="fragen" style="padding-top:0">
+  <div class="wrap">
+    <p class="eyebrow"><i></i>Fragen</p>
+    <h2 class="h2 disp"><span class="mask"><span>Gut zu wissen.</span></span></h2>
+    <div class="faq">
+      <details><summary>Wo liegen meine Rechnungen?<i></i></summary><div class="ans"><div><p>Im Ordner „Dokumente\Rechnungskiste“ auf Ihrem Computer, sortiert nach Jahr. Den Speicherort können Sie im Programm ändern.</p></div></div></details>
+      <details><summary>Brauche ich ein Konto?<i></i></summary><div class="ans"><div><p>Nein. Das Programm läuft ohne Anmeldung und ohne Cloud.</p></div></div></details>
+      <details><summary>Was ist eine E-Rechnung?<i></i></summary><div class="ans"><div><p>Eine Datei im Format XRechnung, die Buchhaltungsprogramme automatisch einlesen. Rechnungskiste legt sie für Firmenkunden neben das PDF. Beim Versand hängen Sie beide Dateien an.</p></div></div></details>
+      <details><summary>Ist die E-Rechnung geprüft?<i></i></summary><div class="ans"><div><p>Das Programm prüft jede E-Rechnung nach dem Speichern mit dem offiziellen KoSIT-Prüfer und zeigt Ihnen das Ergebnis. Rechnungskiste ersetzt keine Steuerberatung. Schauen Sie bei Ihrer ersten Rechnung bitte genau hin.</p></div></div></details>
+      <details><summary>Warum warnt Windows?<i></i></summary><div class="ans"><div><p>Die Datei ist noch nicht signiert. Klicken Sie bei der Meldung auf „Weitere Informationen“ und dann auf „Trotzdem ausführen“.</p></div></div></details>
+      <details><summary>Wie widerrufe ich?<i></i></summary><div class="ans"><div><p>Schreiben Sie uns über das Kontaktformular auf dieser Seite oder im Programm unter „Hilfe“. Innerhalb von 14 Tagen nach dem Kauf erhalten Sie Ihr Geld zurück.</p></div></div></details>
+    </div>
+  </div>
+</section>
+
+<!-- DOWNLOAD -->
+<section class="dl sec" id="download">
+  <div class="wrap grid">
+    <div>
+      <p class="eyebrow"><i></i>Download</p>
+      <h2 class="h2 disp"><span class="mask"><span>Neueste</span></span><span class="mask"><span>Version.</span></span></h2>
+      <div class="btns">
+        <a class="pill solid" id="dlMain" href="https://github.com/libertatt/rechnungskiste-setup/releases/latest" rel="noopener" data-mag>Für Windows laden <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4v12M6 11l6 6 6-6M5 20h14"/></svg></a>
+        <a class="pill" href="https://github.com/libertatt/rechnungskiste-setup/releases" rel="noopener">Alle Versionen</a>
+      </div>
+      <div class="info" id="relInfo">
+        <div><span>Version</span><span id="rVer">Neueste auf GitHub</span></div>
+        <div><span>Veröffentlicht</span><span id="rDate">siehe Release</span></div>
+        <div><span>Größe</span><span id="rSize">siehe Release</span></div>
+      </div>
+    </div>
+    <div>
+      <ol>
+        <li><span>Datei <b>Rechnungskiste Setup</b> herunterladen und starten.</span></li>
+        <li><span>Dem Installationsassistenten folgen.</span></li>
+        <li><span>Beim ersten Start Ihre Firmendaten eintragen und die erste Rechnung schreiben.</span></li>
+      </ol>
+      <p class="hint">Windows zeigt eventuell „Der Computer wurde durch Windows geschützt“. Klicken Sie auf „Weitere Informationen“ und „Trotzdem ausführen“. Die Datei ist noch nicht signiert.</p>
+    </div>
+  </div>
+</section>
+
+<!-- KONTAKT -->
+<section class="sec" id="kontakt">
+  <div class="wrap contact">
+    <div>
+      <p class="eyebrow"><i></i>Kontakt</p>
+      <h2 class="h2 disp"><span class="mask"><span>Fragen?</span></span><span class="mask"><span>Schreiben Sie.</span></span></h2>
+      <p class="rv" style="margin-top:2rem;font-size:1.2rem;color:#d5d8dd;max-width:28rem">Fragen zum Programm, Hilfe bei der Einrichtung oder ein Widerruf: Schreiben Sie uns direkt hier. Wir antworten per E-Mail.</p>
+      <p class="rv" style="margin-top:1rem">Direkt per E-Mail: <span class="mailto" id="mailTxt">rechnungskiste.help@outlook.de</span></p>
+    </div>
+    <form id="cf" novalidate aria-label="Kontaktformular">
+      <div class="row2">
+        <div class="fld"><label for="cName">Ihr Name</label><input id="cName" name="name" autocomplete="name" required><div class="err" id="eName" role="alert"></div></div>
+        <div class="fld"><label for="cMail">Ihre E-Mail</label><input id="cMail" name="email" type="email" autocomplete="email" inputmode="email" required><div class="err" id="eMail" role="alert"></div></div>
+      </div>
+      <div class="fld"><label for="cTopic">Thema</label>
+        <select id="cTopic" name="topic">
+          <option>Frage zum Programm</option>
+          <option>Einrichtung mit Telefon-Support</option>
+          <option>Lizenz oder Kauf</option>
+          <option>Widerruf / Geld zurück</option>
+          <option>Fehler melden</option>
+          <option>Sonstiges</option>
+        </select></div>
+      <div class="fld"><label for="cMsg">Ihre Nachricht</label><textarea id="cMsg" name="msg" required maxlength="2000"></textarea><div class="err" id="eMsg" role="alert"></div></div>
+      <div class="hp" aria-hidden="true"><label>Website<input id="cWeb" name="website" tabindex="-1" autocomplete="off"></label></div>
+      <div><button class="pill solid" id="cSend" type="submit"><span id="cSendTxt">Nachricht senden</span> <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17L17 7M8 7h9v9"/></svg></button></div>
+      <div class="ok" id="cOk" role="status" aria-live="polite">
+        <p id="cOkTxt"></p>
+        <button class="pill" type="button" id="cCopy">Text kopieren</button>
+      </div>
+    </form>
+  </div>
+</section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <p class="fbig" id="fbig" aria-hidden="true">Rechnungskiste</p>
+    <div class="fbar">
+      <span>© 2026 Rechnungskiste</span>
+      <nav aria-label="Rechtliches und Links">
+        <button type="button" id="openImp">Impressum</button>
+        <button type="button" id="openDsg">Datenschutz</button>
+        <a href="#download">Download</a>
+        <a href="#kontakt">Kontakt</a>
+      </nav>
+    </div>
+  </div>
+</footer>
+
+<dialog id="imp" aria-labelledby="impT">
+  <div class="in">
+    <button class="ic x" type="button" id="closeImp" aria-label="Impressum schließen"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+    <h2 id="impT">Impressum</h2>
+    <h3>Angaben gemäß § 5 DDG</h3>
+    <p><span class="fill">[Vor- und Nachname bzw. Firma ergänzen]</span></p>
+    <p><span class="fill">[Straße und Hausnummer ergänzen]</span></p>
+    <p><span class="fill">[PLZ und Ort ergänzen]</span></p>
+    <h3>Kontakt</h3>
+    <p>E-Mail: rechnungskiste.help@outlook.de</p>
+    <p>Kontaktformular: <a href="#kontakt" id="impForm">auf dieser Seite</a></p>
+    <h3>Umsatzsteuer</h3>
+    <p><span class="fill">[Umsatzsteuer-Identifikationsnummer, falls vorhanden, sonst Zeile löschen]</span></p>
+    <h3>Verantwortlich für den Inhalt</h3>
+    <p><span class="fill">[Name und Anschrift wie oben]</span></p>
+  </div>
+</dialog>
+
+<dialog id="dsg" aria-labelledby="dsgT">
+  <div class="in">
+    <button class="ic x" type="button" id="closeDsg" aria-label="Datenschutzerklärung schließen"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+    <h2 id="dsgT">Datenschutz</h2>
+    <h3>Verantwortlich</h3>
+    <p>Verantwortlich ist die Person im Impressum. Fragen zum Datenschutz: rechnungskiste.help@outlook.de</p>
+    <h3>Das Programm selbst</h3>
+    <p>Die Rechnungskiste speichert Ihre Rechnungen, Kunden und Einstellungen nur auf Ihrem Computer. Diese Daten werden nicht an uns übertragen. Das Programm verbindet sich nur in drei Fällen mit dem Internet: bei der Suche nach Updates (GitHub), beim Lizenzkauf (Stripe, siehe unten) und wenn Sie das Kontaktformular im Programm absenden.</p>
+    <h3>Aufruf dieser Website</h3>
+    <p>Diese Seite wird über GitHub Pages bereitgestellt (GitHub Inc., USA, ein Unternehmen von Microsoft). Beim Aufruf verarbeitet GitHub technisch notwendige Daten wie Ihre IP-Adresse in Server-Logdateien. Rechtsgrundlage ist Art. 6 Abs. 1 lit. f DSGVO (sicherer und stabiler Betrieb der Website).</p>
+    <h3>Schriftarten</h3>
+    <p>Die Schriften werden von Google Fonts geladen. Dabei wird Ihre IP-Adresse an Google übertragen. Rechtsgrundlage ist Art. 6 Abs. 1 lit. f DSGVO (einheitliche und lesbare Darstellung).</p>
+    <h3>Neueste Version und Download</h3>
+    <p>Um die aktuelle Version anzuzeigen, fragt Ihr Browser bei GitHub (api.github.com) nach dem neuesten Release. Dabei erhält GitHub Ihre IP-Adresse. Der Download selbst erfolgt direkt von GitHub.</p>
+    <h3>Kontaktformular</h3>
+    <p>Wenn Sie uns schreiben, verarbeiten wir Name, E-Mail-Adresse, Thema und Nachricht, um Ihre Anfrage zu beantworten (Art. 6 Abs. 1 lit. b und f DSGVO). Die Nachricht wird bei Cloudflare (Cloudflare Inc., USA) in einer Datenbank in der EU gespeichert. Zum Schutz vor Missbrauch wird zusätzlich ein gekürzter, nicht umkehrbarer Prüfwert Ihrer IP-Adresse zusammen mit der Nachricht abgelegt. Wir löschen Anfragen, sobald sie erledigt sind, spätestens nach Ablauf gesetzlicher Aufbewahrungsfristen, falls diese gelten. Ein Entwurf Ihres Textes wird nur in Ihrem Browser zwischengespeichert und nicht übertragen.</p>
+    <h3>Lizenzkauf</h3>
+    <p>Der Kauf wird über Stripe abgewickelt (Stripe Payments Europe, Ltd., Irland). Ihre Zahlungsdaten gibt Stripe nicht an uns weiter. Wir erhalten Name, E-Mail-Adresse und den Zahlungsstatus, um Ihnen die Lizenz auszustellen (Art. 6 Abs. 1 lit. b DSGVO). Rechnungsdaten bewahren wir gemäß steuer- und handelsrechtlicher Pflichten auf (Art. 6 Abs. 1 lit. c DSGVO).</p>
+    <h3>Übermittlung in Drittländer</h3>
+    <p>GitHub, Google, Cloudflare und Stripe können Daten in den USA verarbeiten. Die Übermittlung stützt sich auf den EU-US-Datenschutzrahmen oder Standardvertragsklauseln der EU-Kommission.</p>
+    <h3>Ihre Rechte</h3>
+    <p>Sie haben das Recht auf Auskunft, Berichtigung, Löschung, Einschränkung der Verarbeitung, Datenübertragbarkeit und Widerspruch gegen Verarbeitungen auf Grundlage berechtigter Interessen. Schreiben Sie uns dazu einfach über das Kontaktformular. Außerdem können Sie sich bei einer Datenschutzaufsichtsbehörde beschweren, zum Beispiel bei der Berliner Beauftragten für Datenschutz und Informationsfreiheit.</p>
+    <p style="margin-top:1.2rem;color:var(--mute)">Stand: November 2026</p>
+  </div>
+</dialog>
+
+<script>
+(function(){
+  'use strict';
+  var d=document,w=window;
+  var reduce=w.matchMedia&&w.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var fine=w.matchMedia&&w.matchMedia('(pointer: fine)').matches;
+  d.body.classList.remove('nojs');d.documentElement.classList.add('js');
+  var $=function(s,c){return (c||d).querySelector(s)};
+  var $$=function(s,c){return Array.prototype.slice.call((c||d).querySelectorAll(s))};
+
+  /* Überschriften auf Spaltenbreite einpassen */
+  function fit(){
+    var wrap=$('.hero .wrap');if(!wrap)return;
+    var cs=getComputedStyle(wrap);
+    var avail=wrap.clientWidth-parseFloat(cs.paddingLeft)-parseFloat(cs.paddingRight);
+    var a=$('#wm1'),b=$('#wm2');
+    a.style.fontSize='100px';b.style.fontSize='100px';
+    var wa=a.scrollWidth||a.getBoundingClientRect().width;
+    var fs=Math.floor(100*avail*(w.innerWidth>992?0.63:1)/Math.max(wa,1)*0.995);
+    a.style.fontSize=fs+'px';b.style.fontSize=fs+'px';
+    var f=$('#fbig');
+    if(f){f.style.fontSize='100px';var fw=f.scrollWidth;var fa=f.parentNode.clientWidth-parseFloat(getComputedStyle(f.parentNode).paddingLeft)*2;f.style.fontSize=Math.floor(100*fa/Math.max(fw,1)*0.995)+'px';}
+  }
+  fit();
+  if(d.fonts&&d.fonts.ready){d.fonts.ready.then(fit)}
+  w.addEventListener('resize',fit);
+
+  /* Fortschritt und Kopfzeile */
+  var prog=$('#prog'),nav=$('#nav');
+  var ticking=false;
+  function onScroll(){
+    if(ticking)return;ticking=true;
+    requestAnimationFrame(function(){
+      var h=d.documentElement.scrollHeight-w.innerHeight;
+      var y=w.scrollY||d.documentElement.scrollTop;
+      prog.style.transform='scaleX('+(h>0?Math.min(1,y/h):0)+')';
+      nav.classList.toggle('stuck',y>40);
+      wordFill();stepsUpdate();
+      ticking=false;
+    });
+  }
+  w.addEventListener('scroll',onScroll,{passive:true});
+
+  /* Einblenden */
+  var seen=false;
+  function show(el){el.classList.add('in')}
+  var targets=$$('.rv,.mask,.pair');
+  if('IntersectionObserver' in w){
+    var io=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting){show(e.target);io.unobserve(e.target)}})},{threshold:.15,rootMargin:'0px 0px -6% 0px'});
+    targets.forEach(function(t){io.observe(t)});
+    setTimeout(function(){targets.forEach(function(t){var r=t.getBoundingClientRect();if(r.top<w.innerHeight&&r.bottom>0)show(t)})},1200);
+  }else{targets.forEach(show)}
+
+  /* Wortweise Hervorhebung */
+  var st=$('#state'),words=[];
+  if(st){
+    var out=[];
+    function walk(n,cls){
+      n.childNodes.forEach(function(c){
+        if(c.nodeType===3){c.textContent.split(/(\s+)/).forEach(function(p){if(!p)return;if(/^\s+$/.test(p)){out.push(d.createTextNode(p))}else{var s=d.createElement('span');s.className='w'+(cls?' b':'');s.textContent=p;out.push(s)}})}
+        else if(c.nodeType===1){walk(c,c.classList.contains('b'))}
+      });
+    }
+    walk(st,false);st.textContent='';out.forEach(function(n){st.appendChild(n)});
+    words=$$('.w',st);
+  }
+  function wordFill(){
+    if(!words.length)return;
+    if(reduce){words.forEach(function(x){x.classList.add('on')});return}
+    var r=st.getBoundingClientRect(),vh=w.innerHeight;
+    var p=(vh*0.85-r.top)/(r.height+vh*0.25);
+    p=Math.max(0,Math.min(1,p));
+    var n=Math.round(p*words.length);
+    words.forEach(function(x,i){x.classList.toggle('on',i<n)});
+  }
+
+  /* Schritte */
+  var track=$('#track'),sts=$$('.st'),nums=$$('#bignum span'),dots=$$('#dots i'),cur=-1;
+  function stepsUpdate(){
+    if(!track||w.innerWidth<=992)return;
+    var r=track.getBoundingClientRect(),vh=w.innerHeight;
+    var p=-r.top/Math.max(1,r.height-vh);
+    p=Math.max(0,Math.min(.999,p));
+    var i=Math.floor(p*3);
+    if(i===cur)return;cur=i;
+    sts.forEach(function(s,k){s.classList.toggle('on',k===i)});
+    nums.forEach(function(s,k){s.classList.toggle('on',k===i)});
+    dots.forEach(function(s,k){s.classList.toggle('on',k===i)});
+  }
+
+  /* Zahlen zählen */
+  var counted=false;
+  var facts=$('#facts');
+  function countUp(){
+    if(counted)return;counted=true;
+    $$('[data-count]',facts).forEach(function(el){
+      var to=+el.dataset.count,from=+el.dataset.from;
+      if(reduce||from===to){el.textContent=to;return}
+      var t0=null,dur=1400;
+      function f(t){if(t0===null)t0=t;var k=Math.min(1,(t-t0)/dur);k=1-Math.pow(1-k,3);el.textContent=Math.round(from+(to-from)*k);if(k<1)requestAnimationFrame(f)}
+      el.textContent=from;requestAnimationFrame(f);
+    });
+  }
+  if('IntersectionObserver' in w&&facts){var io2=new IntersectionObserver(function(es){if(es[0].isIntersecting){countUp();io2.disconnect()}},{threshold:.4});io2.observe(facts)}
+
+  /* Maus-Parallaxe im Hero */
+  var obj=$('#object'),circ=$('#circle'),stage=$('#stage');
+  if(fine&&!reduce&&stage&&w.innerWidth>992){
+    var tx=0,ty=0,cx=0,cy=0,raf=null;
+    stage.addEventListener('pointermove',function(e){
+      var r=stage.getBoundingClientRect();
+      tx=(e.clientX-r.left)/r.width-.5;ty=(e.clientY-r.top)/r.height-.5;
+      if(!raf)raf=requestAnimationFrame(loop);
+    });
+    stage.addEventListener('pointerleave',function(){tx=0;ty=0;if(!raf)raf=requestAnimationFrame(loop)});
+    function loop(){
+      cx+=(tx-cx)*.08;cy+=(ty-cy)*.08;
+      obj.style.transform='translate('+(-52+cx*5)+'%,'+(cy*5)+'%) rotate('+(cx*4)+'deg)';
+      circ.style.transform='translate(calc(-50% + '+(-cx*34)+'px),calc(-50% + '+(-cy*24)+'px))';
+      if(Math.abs(tx-cx)>.001||Math.abs(ty-cy)>.001){raf=requestAnimationFrame(loop)}else{raf=null}
+    }
+  }
+
+  /* Magnetische Knöpfe */
+  if(fine&&!reduce){
+    $$('[data-mag]').forEach(function(b){
+      b.addEventListener('pointermove',function(e){var r=b.getBoundingClientRect();b.style.transform='translate('+((e.clientX-r.left-r.width/2)*.18)+'px,'+((e.clientY-r.top-r.height/2)*.28)+'px)'});
+      b.addEventListener('pointerleave',function(){b.style.transform=''});
+    });
+  }
+
+  /* Aktiver Menüpunkt */
+  var secs=$$('main section[id]');
+  var links=$$('.links a');
+  if('IntersectionObserver' in w){
+    var io3=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting){links.forEach(function(a){a.classList.toggle('on',a.getAttribute('href')==='#'+e.target.id)})}})},{rootMargin:'-45% 0px -50% 0px'});
+    secs.forEach(function(s){io3.observe(s)});
+  }
+
+  /* Neueste Version von GitHub (nur wenn der Browser die Anfrage zulässt) */
+  var REL='https://api.github.com/repos/libertatt/rechnungskiste-setup/releases/latest',KEY='rk_release_v1';
+  function applyRel(r){
+    if(!r||!r.tag_name)return;
+    var a=(r.assets||[]).filter(function(x){return /\.exe$/i.test(x.name)})[0];
+    $('#rVer').textContent=r.tag_name;
+    if(r.published_at){$('#rDate').textContent=new Date(r.published_at).toLocaleDateString('de-DE',{day:'numeric',month:'long',year:'numeric'})}
+    if(a){$('#rSize').textContent=(a.size/1048576).toFixed(0)+' MB';$('#dlMain').href=a.browser_download_url}
+  }
+  try{var c=JSON.parse(localStorage.getItem(KEY)||'null');if(c&&Date.now()-c.t<1800000){applyRel(c.r)}else{throw 0}}
+  catch(e){
+    try{
+      fetch(REL,{headers:{Accept:'application/vnd.github+json'}}).then(function(r){return r.ok?r.json():null}).then(function(r){
+        if(!r)return;applyRel(r);try{localStorage.setItem(KEY,JSON.stringify({t:Date.now(),r:{tag_name:r.tag_name,published_at:r.published_at,assets:(r.assets||[]).map(function(x){return{name:x.name,size:x.size,browser_download_url:x.browser_download_url}})}}))}catch(e2){}
+      }).catch(function(){});
+    }catch(e3){}
+  }
+
+  /* Kontaktformular */
+  var TO='rechnungskiste.help@outlook.de';
+  /* Adresse des Cloudflare-Workers, z. B. https://rechnungskiste-kontakt.NAME.workers.dev/api/contact
+     Leer lassen: dann öffnet sich das E-Mail-Programm wie bisher. */
+  var ENDPOINT='https://rechnungskiste-kontakt.t2-email-y2.workers.dev/api/contact';
+  var f=$('#cf'),send=$('#cSend'),ok=$('#cOk'),okTxt=$('#cOkTxt'),copyB=$('#cCopy');
+  var DK='rk_contact_draft',lastText='';
+  try{var dr=JSON.parse(localStorage.getItem(DK)||'null');if(dr){['cName','cMail','cMsg'].forEach(function(id,i){var k=['n','m','t'][i];if(dr[k])$('#'+id).value=dr[k]});if(dr.p)$('#cTopic').value=dr.p}}catch(e){}
+  function saveDraft(){try{localStorage.setItem(DK,JSON.stringify({n:$('#cName').value,m:$('#cMail').value,t:$('#cMsg').value,p:$('#cTopic').value}))}catch(e){}}
+  f.addEventListener('input',saveDraft);f.addEventListener('change',saveDraft);
+  $$('[data-topic]').forEach(function(a){a.addEventListener('click',function(){$('#cTopic').value=a.dataset.topic;saveDraft()})});
+  $$('#cf input,#cf textarea,#cf select').forEach(function(el){el.addEventListener('focus',function(){setTimeout(function(){try{el.scrollIntoView({block:'center',behavior:reduce?'auto':'smooth'})}catch(e){}},250)})});
+  function setErr(id,fid,msg){$('#'+id).textContent=msg||'';var el=$('#'+fid);el.setAttribute('aria-invalid',msg?'true':'false')}
+  var EM=/^[^@\s]+@[^@\s]+\.[^@\s]+$/;
+  f.addEventListener('submit',function(e){
+    e.preventDefault();
+    if(send.disabled)return;
+    var n=$('#cName').value.trim(),m=$('#cMail').value.trim(),t=$('#cMsg').value.trim(),p=$('#cTopic').value;
+    setErr('eName','cName',n?'':'Bitte tragen Sie Ihren Namen ein.');
+    setErr('eMail','cMail',EM.test(m)?'':'Bitte tragen Sie eine gültige E-Mail-Adresse ein, zum Beispiel name@beispiel.de.');
+    setErr('eMsg','cMsg',t?'':'Bitte schreiben Sie kurz, wobei wir helfen sollen.');
+    if(!n||!EM.test(m)||!t){var bad=f.querySelector('[aria-invalid="true"]');if(bad)bad.focus();return}
+    send.disabled=true;
+    var subj='Rechnungskiste: '+p;
+    var body=t+'\n\n---\nName: '+n+'\nE-Mail: '+m;
+    lastText='An: '+TO+'\nBetreff: '+subj+'\n\n'+body;
+    function viaMail(note){
+      okTxt.textContent=note+'Ihr E-Mail-Programm sollte sich jetzt mit dem fertigen Text öffnen. Senden Sie die Nachricht dort ab. Falls sich nichts öffnet, kopieren Sie den Text und schicken Sie ihn an '+TO+'.';
+      copyB.hidden=false;ok.classList.add('show');
+      var a=d.createElement('a');a.href='mailto:'+TO+'?subject='+encodeURIComponent(subj)+'&body='+encodeURIComponent(body.slice(0,1800));a.style.display='none';d.body.appendChild(a);a.click();d.body.removeChild(a);
+      ok.scrollIntoView({block:'nearest',behavior:reduce?'auto':'smooth'});
+      setTimeout(function(){send.disabled=false},1500);
+    }
+    if(!ENDPOINT){viaMail('');return}
+    $('#cSendTxt').textContent='Wird gesendet';
+    var ctrl=('AbortController' in w)?new AbortController():null;
+    var to=setTimeout(function(){if(ctrl)ctrl.abort()},12000);
+    fetch(ENDPOINT,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name:n,email:m,topic:p,msg:t,website:$('#cWeb').value}),signal:ctrl?ctrl.signal:undefined})
+      .then(function(r){return r.json().then(function(j){return{r:r,j:j}})})
+      .then(function(x){
+        clearTimeout(to);$('#cSendTxt').textContent='Nachricht senden';
+        if(x.r.ok&&x.j.ok){
+          okTxt.textContent='Danke, Ihre Nachricht ist angekommen. Wir antworten an '+m+'.';
+          copyB.hidden=true;ok.classList.add('show');
+          try{localStorage.removeItem(DK)}catch(e){}
+          $('#cMsg').value='';
+          ok.scrollIntoView({block:'nearest',behavior:reduce?'auto':'smooth'});
+          setTimeout(function(){send.disabled=false},3000);
+        }else if(x.r.status===429){
+          setErr('eMsg','cMsg',x.j.error||'Bitte später erneut versuchen.');send.disabled=false;
+        }else{viaMail('Das Senden hat nicht geklappt. ')}
+      })
+      .catch(function(){clearTimeout(to);$('#cSendTxt').textContent='Nachricht senden';viaMail('Das Senden hat nicht geklappt. ')});
+  });
+  copyB.addEventListener('click',function(){
+    var done=function(ok2){copyB.textContent=ok2?'Kopiert':'Bitte Text von Hand markieren';setTimeout(function(){copyB.textContent='Text kopieren'},2200)};
+    try{navigator.clipboard.writeText(lastText).then(function(){done(true)},function(){done(false)})}catch(e){done(false)}
+  });
+
+  /* Impressum und Datenschutz */
+  function dlg(id,openId,closeId){
+    var el=$('#'+id);
+    function open(){if(el.showModal){try{el.showModal()}catch(e){el.setAttribute('open','')}}else{el.setAttribute('open','')}}
+    function close(){if(el.close){el.close()}else{el.removeAttribute('open')}}
+    $('#'+openId).addEventListener('click',open);
+    $('#'+closeId).addEventListener('click',close);
+    el.addEventListener('click',function(e){if(e.target===el)close()});
+    return close;
+  }
+  var closeImp=dlg('imp','openImp','closeImp');
+  dlg('dsg','openDsg','closeDsg');
+  $('#impForm').addEventListener('click',closeImp);
+
+  onScroll();wordFill();
+})();
+</script>
+</body>
+</html>
