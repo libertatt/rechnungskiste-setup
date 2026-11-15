@@ -595,6 +595,8 @@ dialog .x{position:absolute;right:1rem;top:1rem}
       <nav aria-label="Rechtliches und Links">
         <button type="button" id="openImp">Impressum</button>
         <button type="button" id="openDsg">Datenschutz</button>
+        <button type="button" id="openAgb">AGB</button>
+        <button type="button" id="openWid">Widerruf</button>
         <a href="#download">Download</a>
         <a href="#kontakt">Kontakt</a>
       </nav>
@@ -607,16 +609,103 @@ dialog .x{position:absolute;right:1rem;top:1rem}
     <button class="ic x" type="button" id="closeImp" aria-label="Impressum schließen"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
     <h2 id="impT">Impressum</h2>
     <h3>Angaben gemäß § 5 DDG</h3>
-    <p><span class="fill">[Vor- und Nachname bzw. Firma ergänzen]</span></p>
-    <p><span class="fill">[Straße und Hausnummer ergänzen]</span></p>
-    <p><span class="fill">[PLZ und Ort ergänzen]</span></p>
+    <p>Abdülveli Turan Yigit</p>
+    <p>Joseph-Oertgen-Weg 77</p>
+    <p>45327 Essen</p>
     <h3>Kontakt</h3>
     <p>E-Mail: rechnungskiste.help@outlook.de</p>
     <p>Kontaktformular: <a href="#kontakt" id="impForm">auf dieser Seite</a></p>
-    <h3>Umsatzsteuer</h3>
-    <p><span class="fill">[Umsatzsteuer-Identifikationsnummer, falls vorhanden, sonst Zeile löschen]</span></p>
     <h3>Verantwortlich für den Inhalt</h3>
-    <p><span class="fill">[Name und Anschrift wie oben]</span></p>
+    <p>Abdülveli Turan Yigit, Anschrift wie oben</p>
+  </div>
+</dialog>
+
+<dialog id="agb" aria-labelledby="agbT">
+  <div class="in">
+    <button class="ic x" type="button" id="closeAgb" aria-label="AGB schließen"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+    <h2 id="agbT">AGB</h2>
+    <h3>1. Geltungsbereich und Anbieter</h3>
+    <p>1.1 Diese AGB gelten für alle Verträge über die Nutzung der Software „Rechnungskiste“ (Programm) zwischen dem Anbieter und dem Kunden.</p>
+    <p>1.2 Anbieter ist die im Impressum auf dieser Website genannte Person mit Sitz in Essen, Deutschland. Kontakt: rechnungskiste.help@outlook.de sowie das Kontaktformular auf der Website und im Programm.</p>
+    <p>1.3 Kunde kann ein Verbraucher (§ 13 BGB) oder ein Unternehmer (§ 14 BGB) sein. Regeln, die nur für eine dieser Gruppen gelten, sind ausdrücklich so bezeichnet.</p>
+    <p>1.4 Abweichende Bedingungen des Kunden gelten nur, wenn der Anbieter ihnen ausdrücklich zustimmt.</p>
+    <h3>2. Leistungsumfang</h3>
+    <p>2.1 Die Rechnungskiste ist eine Software für Windows zum Erstellen und Verwalten von Rechnungen. Sie erzeugt Rechnungen als PDF und, soweit die jeweilige Programmversion es vorsieht, als E-Rechnung im Format XRechnung.</p>
+    <p>2.2 Das Programm unterstützt insbesondere Rechnungen mit Umsatzsteuersätzen von 19 %, 7 % und 0 % je Position sowie Rechnungen ohne Umsatzsteuerausweis nach § 19 UStG, die lokale Speicherung von Rechnungen, Kunden und Leistungen, eine automatisch geführte Übersicht ausgehender Rechnungen, eine technische Prüfung der erzeugten E-Rechnung (soweit das Prüfwerkzeug mitgeliefert wird) sowie die Suche nach Updates und deren Installation.</p>
+    <p>2.3 Rechnungen, Kundendaten und Belege werden auf dem Computer des Kunden gespeichert und nicht an den Anbieter übertragen. Eine Verbindung zum Internet braucht das Programm nur für Updates, den Lizenzkauf und das Kontaktformular.</p>
+    <p>2.4 Es gibt zwei Varianten: Die kostenlose Variante erlaubt bis zu drei erstellte Rechnungen pro Kalendermonat. Die Vollversion erlaubt unbegrenzt viele Rechnungen während der Lizenzlaufzeit und enthält die Updates dieses Zeitraums.</p>
+    <p>2.5 Der Anbieter darf das Programm weiterentwickeln, verbessern und an rechtliche oder technische Anforderungen anpassen. Die vereinbarten wesentlichen Eigenschaften bleiben dabei erhalten.</p>
+    <p>2.6 Optional kann der Kunde eine einmalige Einrichtung per Telefon buchen (Preis und Umfang laut Angebot im Programm). Geschuldet ist die gemeinsame Einrichtung, nicht ein bestimmter wirtschaftlicher oder steuerlicher Erfolg.</p>
+    <p>2.7 Bestandteile von Dritten (zum Beispiel das E-Rechnungs-Prüfwerkzeug) unterliegen ihren eigenen Lizenzbedingungen. Diese liegen dem Programm bei.</p>
+    <h3>3. Vertragsschluss und Bestellvorgang</h3>
+    <p>3.1 Die kostenlose Variante kommt mit Download und Installation zustande.</p>
+    <p>3.2 Die Vollversion wird im Programm unter „Lizenz“ gekauft. Der Ablauf: Der Kunde gibt seine E-Mail-Adresse ein und bestätigt diese AGB und die Widerrufsbelehrung. Das Programm öffnet die Zahlungsseite des Zahlungsdienstleisters im Browser. Dort wählt der Kunde die Zahlungsart, prüft seine Angaben und schließt den Kauf mit der dafür vorgesehenen, als zahlungspflichtig beschrifteten Schaltfläche ab. Bis zum Abschluss kann der Kunde seine Eingaben korrigieren oder den Vorgang durch Schließen des Fensters abbrechen.</p>
+    <p>3.3 Mit dem Abschluss gibt der Kunde ein verbindliches Angebot zum Kauf der Lizenz ab. Der Vertrag kommt zustande, wenn der Anbieter die Lizenz bereitstellt, in der Regel unmittelbar nach erfolgreicher Zahlung, und der Kunde sie im Programm oder auf der Bestätigungsseite erhält.</p>
+    <p>3.4 Die Vertragssprache ist Deutsch. Diese AGB können jederzeit auf der Website abgerufen, gespeichert und ausgedruckt werden. Der Anbieter speichert den Vertragstext nicht für den Kunden zugänglich. Der Kunde erhält eine Zahlungsbestätigung und Rechnung per E-Mail.</p>
+    <h3>4. Nutzungsrecht</h3>
+    <p>4.1 Der Anbieter räumt dem Kunden ein einfaches, nicht ausschließliches, nicht übertragbares und nicht unterlizenzierbares Recht ein, das Programm für eigene geschäftliche oder private Zwecke zu nutzen. Bei der Vollversion gilt das für die Dauer der Lizenz.</p>
+    <p>4.2 Der Lizenzschlüssel ist nur für den Kunden bestimmt. Er darf nicht veröffentlicht, verkauft oder unberechtigt weitergegeben werden. Die Weitergabe, Vermietung oder Unterlizenzierung des Programms ist nicht erlaubt.</p>
+    <p>4.3 Der Kunde darf das Programm nicht ändern, zurückentwickeln oder zerlegen, soweit das Gesetz (zum Beispiel § 69d, § 69e UrhG) das nicht ausdrücklich erlaubt.</p>
+    <h3>5. Preise, Zahlung, Laufzeit</h3>
+    <p>5.1 Die Vollversion kostet <span class="fill">[44,00]</span> € pro Lizenzjahr. <span class="fill">[Preisvariante festlegen: Endpreis inklusive gesetzlicher Umsatzsteuer ODER Hinweis auf Kleinunternehmer nach § 19 UStG]</span></p>
+    <p>5.2 Die Zahlung erfolgt über den Zahlungsdienstleister Stripe. Es gelten zusätzlich dessen Bedingungen. Die verfügbaren Zahlungsarten werden bei der Zahlung angezeigt.</p>
+    <p>5.3 Die Lizenz gilt 365 Tage ab Ausstellung und endet danach automatisch. Sie verlängert sich nicht von selbst. Nach Ablauf kann der Kunde eine neue Lizenz kaufen. Ohne gültige Lizenz gilt die kostenlose Variante.</p>
+    <p>5.4 Bereits erstellte Rechnungen und Daten bleiben nach Ablauf der Lizenz auf dem Computer des Kunden und lesbar.</p>
+    <h3>6. Widerruf und Rückgabegarantie</h3>
+    <p>6.1 Verbraucher haben ein gesetzliches Widerrufsrecht von 14 Tagen. Einzelheiten stehen in der Widerrufsbelehrung.</p>
+    <p>6.2 Unabhängig davon gewährt der Anbieter allen Kunden, auch Unternehmern, eine freiwillige Rückgabe innerhalb von 14 Tagen ab Ausstellung der Lizenz. Es genügt eine Nachricht über das Kontaktformular oder per E-Mail. Der gezahlte Preis wird auf das ursprünglich verwendete Zahlungsmittel erstattet. Mit der Erstattung endet die Lizenz.</p>
+    <p>6.3 Gesetzliche Rechte des Kunden bleiben unberührt.</p>
+    <h3>7. Pflichten des Kunden</h3>
+    <p>7.1 Der Kunde ist selbst dafür verantwortlich, dass die eingegebenen Daten richtig und vollständig sind. Das betrifft insbesondere Namen und Anschriften, Steuernummer oder USt-IdNr., Steuersätze, Beträge, Leistungszeitpunkt und Bankverbindung.</p>
+    <p>7.2 Der Kunde prüft jede Rechnung vor Verwendung und Versand selbst auf Richtigkeit und Vollständigkeit.</p>
+    <p>7.3 Der Kunde ist selbst für die Einhaltung der für ihn geltenden steuerlichen, handelsrechtlichen und buchhalterischen Vorschriften verantwortlich, auch für Aufbewahrungsfristen.</p>
+    <p>7.4 Der Kunde sichert seine Daten selbst und regelmäßig, zum Beispiel durch Kopien des Rechnungsordners auf einem getrennten Datenträger. Das Programm ersetzt kein Datensicherungskonzept.</p>
+    <p>7.5 Der Kunde sorgt für eine geeignete technische Umgebung (unterstütztes Windows, ausreichend Speicherplatz).</p>
+    <h3>8. Hinweise zu Steuer, Recht und E-Rechnung</h3>
+    <p>8.1 Die Rechnungskiste ist ein technisches Hilfsmittel. Sie ist keine Steuer-, Rechts- oder Unternehmensberatung. Der Anbieter prüft nicht die steuerliche Situation des Kunden.</p>
+    <p>8.2 Der Anbieter bemüht sich, dass das Programm die jeweils veröffentlichten Anforderungen an Rechnungen und an das Format XRechnung abbildet. Er garantiert nicht, dass eine Rechnung vom Empfänger, von einer Behörde oder einem Rechnungsportal angenommen oder steuerlich anerkannt wird. Anforderungen und Formate können sich ändern.</p>
+    <p>8.3 Eine technische Prüfung der E-Rechnung ersetzt keine steuerliche oder rechtliche Prüfung.</p>
+    <p>8.4 Die Übersicht der ausgehenden Rechnungen im Programm ist eine Arbeitshilfe. Sie ersetzt keine Buchhaltungssoftware und keine steuerliche Beratung.</p>
+    <h3>9. Updates, Support, Verfügbarkeit</h3>
+    <p>9.1 Während der Lizenzlaufzeit stellt der Anbieter die im Tarif enthaltenen Updates bereit sowie die Aktualisierungen, zu denen er gesetzlich verpflichtet ist. Ein Anspruch auf bestimmte neue Funktionen besteht nicht.</p>
+    <p>9.2 Updates können Fehlerkorrekturen, Sicherheitsverbesserungen, Anpassungen an gesetzliche Anforderungen und neue Funktionen enthalten. Das Programm weist auf verfügbare Updates hin. Der Kunde entscheidet, wann er sie installiert.</p>
+    <p>9.3 Support erfolgt über das Kontaktformular und die genannte E-Mail-Adresse. Eine bestimmte Antwortzeit ist nicht zugesagt.</p>
+    <p>9.4 Funktionen mit Internetverbindung (Updates, Lizenzkauf, Kontaktformular) können durch Wartung oder Störungen bei Dritten, zum Beispiel Hosting-, Zahlungs- oder Datenbankdienstleistern, zeitweise nicht verfügbar sein. Der Anbieter schuldet keine unterbrechungsfreie Erreichbarkeit dieser Dienste, soweit gesetzlich zulässig.</p>
+    <h3>10. Haftung</h3>
+    <p>10.1 Der Anbieter haftet unbeschränkt bei Vorsatz und grober Fahrlässigkeit, bei Schäden aus der Verletzung des Lebens, des Körpers oder der Gesundheit, nach dem Produkthaftungsgesetz, bei arglistig verschwiegenen Mängeln und bei Übernahme einer Garantie.</p>
+    <p>10.2 Bei leicht fahrlässiger Verletzung einer wesentlichen Vertragspflicht haftet der Anbieter nur für den vorhersehbaren, vertragstypischen Schaden. Wesentlich ist eine Pflicht, deren Erfüllung die ordnungsgemäße Durchführung des Vertrags erst ermöglicht und auf deren Einhaltung der Kunde regelmäßig vertrauen darf. Gegenüber Unternehmern ist die Haftung in diesem Fall zusätzlich auf die vom Kunden in den letzten zwölf Monaten gezahlte Vergütung begrenzt.</p>
+    <p>10.3 Im Übrigen ist die Haftung für leicht fahrlässig verursachte Schäden ausgeschlossen.</p>
+    <p>10.4 Für Schäden, die darauf beruhen, dass der Kunde unrichtige oder unvollständige Daten eingegeben, Rechnungen nicht geprüft oder gesetzliche Pflichten nicht eingehalten hat, haftet der Anbieter nicht, soweit ihn kein eigenes Verschulden trifft.</p>
+    <p>10.5 Bei Datenverlust haftet der Anbieter im Rahmen der Ziffern 10.1 bis 10.3 nur für den Aufwand, der auch bei regelmäßiger, gefahrentsprechender Datensicherung durch den Kunden zur Wiederherstellung der Daten entstanden wäre.</p>
+    <p>10.6 Die kostenlose Variante wird unentgeltlich überlassen. Für sie haftet der Anbieter nur bei Vorsatz und grober Fahrlässigkeit sowie in den Fällen von Ziffer 10.1.</p>
+    <p>10.7 Die Haftungsregeln gelten auch zugunsten der Mitarbeiter und Erfüllungsgehilfen des Anbieters.</p>
+    <p>10.8 Gesetzliche Mängelrechte, auch nach den Vorschriften über digitale Produkte, bleiben unberührt. Der Kunde meldet Fehler möglichst genau mit einer Beschreibung, wie sie entstehen.</p>
+    <h3>11. Datenschutz</h3>
+    <p>Informationen zur Verarbeitung personenbezogener Daten stehen in der Datenschutzerklärung auf dieser Website. Rechnungsinhalte und Kundendaten, die nur lokal gespeichert werden, überträgt das Programm nicht an den Anbieter.</p>
+    <h3>12. Änderungen dieser AGB</h3>
+    <p>Für neue Verträge gilt die jeweils aktuelle Fassung. Bestehende Verträge ändert der Anbieter nur mit Zustimmung des Kunden. Ausgenommen sind Anpassungen, die gesetzlich nötig sind oder den Kunden nicht benachteiligen.</p>
+    <h3>13. Schlussbestimmungen</h3>
+    <p>13.1 Es gilt das Recht der Bundesrepublik Deutschland. Das UN-Kaufrecht ist ausgeschlossen. Gegenüber Verbrauchern gilt diese Rechtswahl nur, soweit dadurch keine zwingenden Verbraucherschutzvorschriften des Staates entzogen werden, in dem der Verbraucher seinen gewöhnlichen Aufenthalt hat.</p>
+    <p>13.2 Gerichtsstand ist Essen, soweit der Kunde Kaufmann, juristische Person des öffentlichen Rechts oder öffentlich-rechtliches Sondervermögen ist oder keinen allgemeinen Gerichtsstand in Deutschland hat.</p>
+    <p>13.3 <span class="fill">[Streitbeilegung festlegen: nicht bereit und nicht verpflichtet ODER bereit vor einer bestimmten Verbraucherschlichtungsstelle]</span></p>
+    <p>13.4 Sind einzelne Bestimmungen unwirksam, bleiben die übrigen wirksam. An die Stelle der unwirksamen Bestimmung tritt die gesetzliche Regelung.</p>
+
+  </div>
+</dialog>
+
+<dialog id="wid" aria-labelledby="widT">
+  <div class="in">
+    <button class="ic x" type="button" id="closeWid" aria-label="Widerrufsbelehrung schließen"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+    <h2 id="widT">Widerruf</h2>
+    <h3>Widerrufsrecht</h3>
+    <p>Sie haben das Recht, binnen vierzehn Tagen ohne Angabe von Gründen diesen Vertrag zu widerrufen. Die Widerrufsfrist beträgt vierzehn Tage ab dem Tag des Vertragsschlusses.</p>
+    <p>Um Ihr Widerrufsrecht auszuüben, müssen Sie uns (Abdülveli Turan Yigit, Joseph-Oertgen-Weg 77, 45327 Essen, E-Mail: rechnungskiste.help@outlook.de) mittels einer eindeutigen Erklärung (zum Beispiel ein Brief oder eine E-Mail) über Ihren Entschluss, diesen Vertrag zu widerrufen, informieren. Sie können dafür das beigefügte Muster-Widerrufsformular verwenden, das aber nicht vorgeschrieben ist. Zur Wahrung der Widerrufsfrist reicht es aus, dass Sie die Mitteilung über die Ausübung des Widerrufsrechts vor Ablauf der Widerrufsfrist absenden.</p>
+    <h3>Folgen des Widerrufs</h3>
+    <p>Wenn Sie diesen Vertrag widerrufen, haben wir Ihnen alle Zahlungen, die wir von Ihnen erhalten haben, unverzüglich und spätestens binnen vierzehn Tagen ab dem Tag zurückzuzahlen, an dem die Mitteilung über Ihren Widerruf bei uns eingegangen ist. Für diese Rückzahlung verwenden wir dasselbe Zahlungsmittel, das Sie bei der ursprünglichen Transaktion eingesetzt haben, es sei denn, mit Ihnen wurde ausdrücklich etwas anderes vereinbart. Wir gewähren Ihnen das Widerrufsrecht unabhängig davon, ob Sie das Programm bereits genutzt haben. Mit dem Widerruf endet Ihre Lizenz.</p>
+    <h3>Muster-Widerrufsformular</h3>
+    <p>Wenn Sie den Vertrag widerrufen wollen, füllen Sie bitte dieses Formular aus und senden Sie es zurück.</p>
+    <p>An Abdülveli Turan Yigit, Joseph-Oertgen-Weg 77, 45327 Essen, E-Mail: rechnungskiste.help@outlook.de: Hiermit widerrufe(n) ich/wir (*) den von mir/uns (*) abgeschlossenen Vertrag über den Kauf der Rechnungskiste-Lizenz. Bestellt am (*) / erhalten am (*): … Name des/der Verbraucher(s): … Anschrift des/der Verbraucher(s): … Unterschrift des/der Verbraucher(s) (nur bei Mitteilung auf Papier): … Datum: … (*) Unzutreffendes streichen.</p>
+
   </div>
 </dialog>
 
@@ -627,7 +716,11 @@ dialog .x{position:absolute;right:1rem;top:1rem}
     <h3>Verantwortlich</h3>
     <p>Verantwortlich ist die Person im Impressum. Fragen zum Datenschutz: rechnungskiste.help@outlook.de</p>
     <h3>Das Programm selbst</h3>
-    <p>Die Rechnungskiste speichert Ihre Rechnungen, Kunden und Einstellungen nur auf Ihrem Computer. Diese Daten werden nicht an uns übertragen. Das Programm verbindet sich nur in drei Fällen mit dem Internet: bei der Suche nach Updates (GitHub), beim Lizenzkauf (Stripe, siehe unten) und wenn Sie das Kontaktformular im Programm absenden.</p>
+    <p>Die Rechnungskiste speichert Ihre Rechnungen, Kunden und Einstellungen nur auf Ihrem Computer. Diese Daten werden nicht an uns übertragen. Das Programm verbindet sich nur in diesen Fällen mit dem Internet: bei der Suche nach Updates (GitHub), beim Lizenzkauf (Stripe, siehe unten), wenn Sie das Kontaktformular im Programm absenden und, wenn Sie es ausdrücklich wünschen, bei der freiwilligen Rückmeldung zur Deinstallation. Beim Setup werden Ihnen AGB, Widerrufsbelehrung und diese Datenschutzerklärung zur Zustimmung angezeigt. Das Setup selbst überträgt dabei nichts.</p>
+    <h3>Update-Prüfung im Programm</h3>
+    <p>Das Programm fragt bei GitHub (api.github.com) nach der neuesten Version. GitHub erhält dabei technisch bedingt Ihre IP-Adresse und die Programmversion im Anfragekopf. Wir erhalten davon keine Daten. Rechtsgrundlage ist Art. 6 Abs. 1 lit. f DSGVO (Bereitstellung von Sicherheits- und Fehlerkorrekturen).</p>
+    <h3>Rückmeldung bei der Deinstallation (freiwillig)</h3>
+    <p>Beim Deinstallieren können Sie einen Grund auswählen und optional einen kurzen Text schreiben. Das ist freiwillig. Wenn Sie auf „Überspringen“ klicken oder nichts auswählen, wird nichts gesendet. Gesendet werden nur der gewählte Grund, Ihr optionaler Text und die Programmversion, keine Name-, E-Mail- oder Rechnungsdaten. Bitte schreiben Sie keine personenbezogenen Daten in das Textfeld. Die Rückmeldung wird bei Cloudflare in unserer Datenbank gespeichert. Zum Schutz vor Missbrauch speichern wir einen gekürzten Hash Ihrer IP-Adresse, nicht die Adresse selbst. Rechtsgrundlage ist Ihre Einwilligung nach Art. 6 Abs. 1 lit. a DSGVO, die Sie jederzeit mit Wirkung für die Zukunft widerrufen können. Wir löschen Rückmeldungen nach spätestens 12 Monaten.</p>
     <h3>Aufruf dieser Website</h3>
     <p>Diese Seite wird über GitHub Pages bereitgestellt (GitHub Inc., USA, ein Unternehmen von Microsoft). Beim Aufruf verarbeitet GitHub technisch notwendige Daten wie Ihre IP-Adresse in Server-Logdateien. Rechtsgrundlage ist Art. 6 Abs. 1 lit. f DSGVO (sicherer und stabiler Betrieb der Website).</p>
     <h3>Schriftarten</h3>
@@ -641,7 +734,7 @@ dialog .x{position:absolute;right:1rem;top:1rem}
     <h3>Übermittlung in Drittländer</h3>
     <p>GitHub, Google, Cloudflare und Stripe können Daten in den USA verarbeiten. Die Übermittlung stützt sich auf den EU-US-Datenschutzrahmen oder Standardvertragsklauseln der EU-Kommission.</p>
     <h3>Ihre Rechte</h3>
-    <p>Sie haben das Recht auf Auskunft, Berichtigung, Löschung, Einschränkung der Verarbeitung, Datenübertragbarkeit und Widerspruch gegen Verarbeitungen auf Grundlage berechtigter Interessen. Schreiben Sie uns dazu einfach über das Kontaktformular. Außerdem können Sie sich bei einer Datenschutzaufsichtsbehörde beschweren, zum Beispiel bei der Berliner Beauftragten für Datenschutz und Informationsfreiheit.</p>
+    <p>Sie haben das Recht auf Auskunft, Berichtigung, Löschung, Einschränkung der Verarbeitung, Datenübertragbarkeit und Widerspruch gegen Verarbeitungen auf Grundlage berechtigter Interessen. Schreiben Sie uns dazu einfach über das Kontaktformular. Außerdem können Sie sich bei einer Datenschutzaufsichtsbehörde beschweren, zum Beispiel bei der Landesbeauftragten für Datenschutz und Informationsfreiheit Nordrhein-Westfalen.</p>
     <p style="margin-top:1.2rem;color:var(--mute)">Stand: November 2026</p>
   </div>
 </dialog>
@@ -807,7 +900,7 @@ dialog .x{position:absolute;right:1rem;top:1rem}
   var TO='rechnungskiste.help@outlook.de';
   /* Adresse des Cloudflare-Workers, z. B. https://rechnungskiste-kontakt.NAME.workers.dev/api/contact
      Leer lassen: dann öffnet sich das E-Mail-Programm wie bisher. */
-  var ENDPOINT='https://rechnungskiste-kontakt.t2-email-y2.workers.dev/api/contact';
+  var ENDPOINT='https://rechnungskiste-kontakt.rechnungskiste-dev.workers.dev/api/contact';
   var f=$('#cf'),send=$('#cSend'),ok=$('#cOk'),okTxt=$('#cOkTxt'),copyB=$('#cCopy');
   var DK='rk_contact_draft',lastText='';
   try{var dr=JSON.parse(localStorage.getItem(DK)||'null');if(dr){['cName','cMail','cMsg'].forEach(function(id,i){var k=['n','m','t'][i];if(dr[k])$('#'+id).value=dr[k]});if(dr.p)$('#cTopic').value=dr.p}}catch(e){}
@@ -873,7 +966,10 @@ dialog .x{position:absolute;right:1rem;top:1rem}
     return close;
   }
   var closeImp=dlg('imp','openImp','closeImp');
-  dlg('dsg','openDsg','closeDsg');
+  var DLG={imp:'openImp',dsg:'openDsg',agb:'openAgb',wid:'openWid'};
+  dlg('dsg','openDsg','closeDsg');dlg('agb','openAgb','closeAgb');dlg('wid','openWid','closeWid');
+  function hashOpen(){var k=(location.hash||'').slice(1);if(DLG[k]){var b=$('#'+DLG[k]);if(b)b.click()}}
+  hashOpen();w.addEventListener('hashchange',hashOpen);
   $('#impForm').addEventListener('click',closeImp);
 
   onScroll();wordFill();
